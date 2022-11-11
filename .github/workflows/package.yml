@@ -19,16 +19,24 @@ jobs:
         python-version: "3.10"
 
     - name: Install Briefcase
-      run: python -m pip install git+https://github.com/rmartin16/briefcase.git@code-signing-windows
+      run: |
+        python -m pip install -U pip setuptools wheel
+        python -m pip install git+https://github.com/rmartin16/briefcase.git@code-signing-windows
+
+    - name: Install Certificate
+      run: |
+        echo "${{ secrets.CODESIGNING_CERT_B64 }}" | Out-File cert.b64
+        certutil -decode cert.b64 cert.pfx
+        Import-Certificate -FilePath .\cert.pfx -Cert Cert:\CurrentUser\My -Password ${{ secrets.SIGN_CERT_PASSWORD }}
 
     - name: Package App
-      run: briefcase package windows app
+      run: briefcase package windows app --identity aa3a3ac786cb5b323a58d91d2970846723374631 --no-input
 
     - name: Upload App Exe
       uses: actions/upload-artifact@v3
       with:
         name: app-exe
-        path: 'windows\app\Briefcase Test Toga App\src\Briefcase Test Toga App.exe'
+        path: 'windows\app\Briefcase Test Toga App'
         if-no-files-found: error
 
     - name: Upload App MSI
@@ -42,13 +50,13 @@ jobs:
       run: 'Remove-Item windows -Recurse -Force -Confirm:$false'
 
     - name: Package App - VS
-      run: briefcase package windows visualstudio
+      run: briefcase package windows visualstudio --identity aa3a3ac786cb5b323a58d91d2970846723374631 --no-input
 
     - name: Upload App Exe - VS
       uses: actions/upload-artifact@v3
       with:
         name: app-exe-vs
-        path: 'windows\VisualStudio\Briefcase Test Toga App\x64\Release\Briefcase Test Toga App.exe'
+        path: 'windows\VisualStudio\Briefcase Test Toga App'
         if-no-files-found: error
 
     - name: Upload App MSI - VS
