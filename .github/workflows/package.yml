@@ -27,8 +27,9 @@ jobs:
       run: |
         echo "${{ secrets.CODESIGNING_CERT_B64 }}" | Out-File cert.b64
         certutil -decode cert.b64 cert.pfx
-        #Import-PfxCertificate -FilePath .\cert.pfx -CertStoreLocation Cert:\CurrentUser\My -Password ${{ secrets.SIGN_CERT_PASSWORD }}
-        certutil -user -f -p ${{ secrets.SIGN_CERT_PASSWORD }} -importpfx .\cert.pfx
+        $CertPassword = ConvertTo-SecureString "${{ secrets.SIGN_CERT_PASSWORD }}" -AsPlainText -Force
+        Import-PfxCertificate -FilePath .\cert.pfx -CertStoreLocation Cert:\CurrentUser\My -Password $CertPassword 
+        # certutil -user -f -p ${{ secrets.SIGN_CERT_PASSWORD }} -importpfx .\cert.pfx
 
     - name: Package App
       run: briefcase package windows app --identity aa3a3ac786cb5b323a58d91d2970846723374631 --no-input
