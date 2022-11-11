@@ -1,0 +1,57 @@
+name: Package App
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  package-windows:
+    name: Package App - Windows
+    platform: windows
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3.1.0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4.3.0
+
+    - name: Install Briefcase
+      run: python -m pip install git+https://github.com/rmartin16/briefcase.git@code-signing-windows
+
+    - name: Package App
+      run: briefcase package windows app
+
+    - name: Upload App Exe
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-exe
+        path: 'windows\app\Briefcase Test Toga App\src\Briefcase Test Toga App.exe'
+        if-no-files-found: error
+
+    - name: Upload App MSI
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-msi
+        path: ' windows\Briefcase Test Toga App-0.0.1.msi'
+        if-no-files-found: error
+
+    - name: Delete Build Directory
+      run: 'Remove-Item windows -Recurse -Force -Confirm:$false'
+
+    - name: Package App - VS
+      run: briefcase package windows visualstudio
+
+    - name: Upload App Exe - VS
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-exe-vs
+        path: 'windows\app\Briefcase Test Toga App\src\Briefcase Test Toga App.exe'
+        if-no-files-found: error
+
+    - name: Upload App MSI - VS
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-msi-vs
+        path: ' windows\Briefcase Test Toga App-0.0.1.msi'
+        if-no-files-found: error
