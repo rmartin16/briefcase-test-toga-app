@@ -6,7 +6,7 @@ on:
 jobs:
   package-windows:
     name: Package App - Windows
-    platform: windows
+    runs-on: windows-latest
 
     steps:
 
